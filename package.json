@@ -21,6 +21,7 @@
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
+    "@xyflow/react": "^12.10.0",
     "convex": "^1.31.3",
     "lucide-react": "^0.544.0",
     "nitro": "latest",

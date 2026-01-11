@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Camera, FlaskConical, ArrowRight } from 'lucide-react'
+import { Camera, FlaskConical, ArrowRight, GitBranch } from 'lucide-react'
 
 export const Route = createFileRoute('/')({ component: App })
 
@@ -12,6 +12,15 @@ const experiments = [
       'Capture screenshots of pages or specific DOM elements using Puppeteer. Server-side rendering with headless Chrome.',
     library: 'puppeteer',
     href: '/snapshot',
+  },
+  {
+    id: 'react-flow',
+    icon: <GitBranch className="w-10 h-10 text-cyan-400" />,
+    title: 'React Flow',
+    description:
+      'Build interactive node-based UIs, diagrams, and workflows. Drag nodes, connect them, and create visual data flows.',
+    library: '@xyflow/react',
+    href: '/react-flow',
   },
 ]
 
@@ -74,11 +83,9 @@ function App() {
           ))}
         </div>
 
-        {experiments.length === 1 && (
-          <p className="text-center text-gray-500 mt-8 text-sm">
-            More experiments coming soon...
-          </p>
-        )}
+        <p className="text-center text-gray-500 mt-8 text-sm">
+          More experiments coming soon...
+        </p>
       </section>
     </div>
   )

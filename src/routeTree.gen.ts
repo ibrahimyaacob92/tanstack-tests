@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SnapshotRouteImport } from './routes/snapshot'
+import { Route as ReactFlowRouteImport } from './routes/react-flow'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSnapshotRouteImport } from './routes/api/snapshot'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
@@ -24,6 +25,11 @@ import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ss
 const SnapshotRoute = SnapshotRouteImport.update({
   id: '/snapshot',
   path: '/snapshot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReactFlowRoute = ReactFlowRouteImport.update({
+  id: '/react-flow',
+  path: '/react-flow',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -79,6 +85,7 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/react-flow': typeof ReactFlowRoute
   '/snapshot': typeof SnapshotRoute
   '/api/snapshot': typeof ApiSnapshotRouteWithChildren
   '/api/snapshot/delete': typeof ApiSnapshotDeleteRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/react-flow': typeof ReactFlowRoute
   '/snapshot': typeof SnapshotRoute
   '/api/snapshot': typeof ApiSnapshotRouteWithChildren
   '/api/snapshot/delete': typeof ApiSnapshotDeleteRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/react-flow': typeof ReactFlowRoute
   '/snapshot': typeof SnapshotRoute
   '/api/snapshot': typeof ApiSnapshotRouteWithChildren
   '/api/snapshot/delete': typeof ApiSnapshotDeleteRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/react-flow'
     | '/snapshot'
     | '/api/snapshot'
     | '/api/snapshot/delete'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/react-flow'
     | '/snapshot'
     | '/api/snapshot'
     | '/api/snapshot/delete'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/react-flow'
     | '/snapshot'
     | '/api/snapshot'
     | '/api/snapshot/delete'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ReactFlowRoute: typeof ReactFlowRoute
   SnapshotRoute: typeof SnapshotRoute
   ApiSnapshotRoute: typeof ApiSnapshotRouteWithChildren
   DemoApiNamesRoute: typeof DemoApiNamesRoute
@@ -179,6 +192,13 @@ declare module '@tanstack/react-router' {
       path: '/snapshot'
       fullPath: '/snapshot'
       preLoaderRoute: typeof SnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/react-flow': {
+      id: '/react-flow'
+      path: '/react-flow'
+      fullPath: '/react-flow'
+      preLoaderRoute: typeof ReactFlowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -268,6 +288,7 @@ const ApiSnapshotRouteWithChildren = ApiSnapshotRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ReactFlowRoute: ReactFlowRoute,
   SnapshotRoute: SnapshotRoute,
   ApiSnapshotRoute: ApiSnapshotRouteWithChildren,
   DemoApiNamesRoute: DemoApiNamesRoute,
