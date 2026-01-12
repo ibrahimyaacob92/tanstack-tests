@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   ReactFlow,
   Controls,
@@ -17,180 +17,27 @@ import {
   type OnEdgesChange,
   type OnConnect,
   type NodeTypes,
-  Handle,
-  Position,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { useQuery, useMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import type { Id } from '../../convex/_generated/dataModel'
+import { ArrowLeft, GitBranch } from 'lucide-react'
+
+// Local imports
+import { nodeColors } from './react-flow/constants'
+import { useFlowHistory } from './react-flow/hooks'
 import {
-  ArrowLeft,
-  GitBranch,
-  Plus,
-  Trash2,
-  RotateCcw,
-  Circle,
-  MousePointer,
-  Palette,
-  X,
-} from 'lucide-react'
+  CustomNode,
+  EdgeEditorPopup,
+  FlowToolbar,
+  SaveDialog,
+  LoadDialog,
+} from './react-flow/components'
 
 export const Route = createFileRoute('/react-flow')({
   component: ReactFlowPage,
 })
-
-// Node colors
-const nodeColors = [
-  { name: 'Green', value: '#22c55e' },
-  { name: 'Blue', value: '#3b82f6' },
-  { name: 'Yellow', value: '#f59e0b' },
-  { name: 'Red', value: '#ef4444' },
-  { name: 'Purple', value: '#8b5cf6' },
-  { name: 'Pink', value: '#ec4899' },
-]
-
-// Custom editable node component
-function CustomNode({
-  id,
-  data,
-  selected,
-}: {
-  id: string
-  data: {
-    label: string
-    color: string
-    onLabelChange: (id: string, label: string) => void
-    onColorChange: (id: string, color: string) => void
-  }
-  selected: boolean
-}) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState(data.label)
-  const [showColorPicker, setShowColorPicker] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
-    }
-  }, [isEditing])
-
-  useEffect(() => {
-    setEditValue(data.label)
-  }, [data.label])
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsEditing(true)
-  }
-
-  const handleBlur = () => {
-    setIsEditing(false)
-    if (editValue.trim() && editValue !== data.label) {
-      data.onLabelChange(id, editValue.trim())
-    } else {
-      setEditValue(data.label)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleBlur()
-    } else if (e.key === 'Escape') {
-      setEditValue(data.label)
-      setIsEditing(false)
-    }
-  }
-
-  const handleColorClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setShowColorPicker(!showColorPicker)
-  }
-
-  const handleColorSelect = (color: string) => {
-    data.onColorChange(id, color)
-    setShowColorPicker(false)
-  }
-
-  return (
-    <div
-      className={`relative px-4 py-2 rounded-lg border-2 shadow-lg min-w-[100px] text-center transition-all ${
-        selected ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''
-      }`}
-      style={{
-        backgroundColor: data.color + '20',
-        borderColor: data.color,
-      }}
-      onDoubleClick={handleDoubleClick}
-    >
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="!w-3 !h-3 !bg-gray-400 !border-2 !border-slate-900"
-      />
-
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="bg-transparent text-white font-medium text-sm text-center w-full outline-none border-b border-white/50"
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <span className="text-white font-medium text-sm block">
-          {data.label}
-        </span>
-      )}
-
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="!w-3 !h-3 !bg-gray-400 !border-2 !border-slate-900"
-      />
-
-      {/* Color picker button - only show when selected */}
-      {selected && !isEditing && (
-        <button
-          onClick={handleColorClick}
-          className="absolute -top-2 -right-2 w-5 h-5 bg-slate-700 hover:bg-slate-600 rounded-full flex items-center justify-center border border-slate-500"
-        >
-          <Palette className="w-3 h-3 text-white" />
-        </button>
-      )}
-
-      {/* Color picker popup */}
-      {showColorPicker && (
-        <div
-          className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-600 rounded-lg p-2 flex gap-1 shadow-xl z-50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {nodeColors.map((color) => (
-            <button
-              key={color.value}
-              onClick={() => handleColorSelect(color.value)}
-              className={`w-5 h-5 rounded-full transition-all hover:scale-110 ${
-                data.color === color.value
-                  ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800'
-                  : ''
-              }`}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-            />
-          ))}
-          <button
-            onClick={() => setShowColorPicker(false)}
-            className="w-5 h-5 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center ml-1"
-          >
-            <X className="w-3 h-3 text-white" />
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
 
 const nodeTypes: NodeTypes = {
   custom: CustomNode,
@@ -241,10 +88,18 @@ function FlowEditor() {
   const [nodeCount, setNodeCount] = useState(4)
   const [selectedColor, setSelectedColor] = useState(nodeColors[1].value)
   const [nodeName, setNodeName] = useState('')
+  const [currentFlowId, setCurrentFlowId] = useState<Id<'flows'> | null>(null)
+  const [flowName, setFlowName] = useState('')
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [showLoadDialog, setShowLoadDialog] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
+  const [showEdgeEditor, setShowEdgeEditor] = useState(false)
+  const [edgeEditorPosition, setEdgeEditorPosition] = useState({ x: 0, y: 0 })
 
   const { fitView } = useReactFlow()
 
-  // Handlers for node updates
+  // Handlers for node updates (defined before useFlowHistory)
   const onLabelChange = useCallback((nodeId: string, newLabel: string) => {
     setNodes((nds) =>
       nds.map((node) =>
@@ -265,10 +120,32 @@ function FlowEditor() {
     )
   }, [])
 
+  // Use the extracted history hook
+  const {
+    edgesRef,
+    pushToHistory,
+    undo,
+    redo,
+    resetHistory,
+    canUndo,
+    canRedo,
+  } = useFlowHistory({ onLabelChange, onColorChange })
+
+  // Convex queries and mutations
+  const savedFlows = useQuery(api.flows.listFlows)
+  const createFlow = useMutation(api.flows.createFlow)
+  const updateFlow = useMutation(api.flows.updateFlow)
+  const deleteFlow = useMutation(api.flows.deleteFlow)
+
   const [nodes, setNodes] = useState<Node[]>(() =>
     createInitialNodes(onLabelChange, onColorChange)
   )
   const [edges, setEdges] = useState<Edge[]>(initialEdges)
+
+  // Keep edgesRef in sync for callbacks
+  useEffect(() => {
+    edgesRef.current = edges
+  }, [edges, edgesRef])
 
   const selectedNodes = nodes.filter((n) => n.selected)
   const selectedEdges = edges.filter((e) => e.selected)
@@ -284,19 +161,136 @@ function FlowEditor() {
   )
 
   const onConnect: OnConnect = useCallback(
-    (params) =>
-      setEdges((eds) =>
-        addEdge(
+    (params) => {
+      setEdges((eds) => {
+        const newEdges = addEdge(
           {
             ...params,
             animated: true,
-            style: { stroke: '#64748b' },
+            style: { stroke: '#64748b', strokeWidth: 2 },
           },
           eds
         )
-      ),
+        setTimeout(() => pushToHistory(nodes, newEdges), 0)
+        return newEdges
+      })
+    },
+    [nodes, pushToHistory]
+  )
+
+  // Handle edge click to show editor
+  const onEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      event.stopPropagation()
+      setSelectedEdgeId(edge.id)
+      setEdgeEditorPosition({ x: event.clientX, y: event.clientY })
+      setShowEdgeEditor(true)
+    },
     []
   )
+
+  // Update edge color
+  const updateEdgeColor = useCallback(
+    (edgeId: string, color: string) => {
+      setEdges((eds) => {
+        const newEdges = eds.map((edge) =>
+          edge.id === edgeId
+            ? { ...edge, style: { ...edge.style, stroke: color } }
+            : edge
+        )
+        setTimeout(() => pushToHistory(nodes, newEdges), 0)
+        return newEdges
+      })
+    },
+    [nodes, pushToHistory]
+  )
+
+  // Toggle edge dashed/solid
+  const toggleEdgeDashed = useCallback(
+    (edgeId: string) => {
+      setEdges((eds) => {
+        const newEdges = eds.map((edge) => {
+          if (edge.id !== edgeId) return edge
+          const currentDash = edge.style?.strokeDasharray
+          return {
+            ...edge,
+            style: {
+              ...edge.style,
+              strokeDasharray: currentDash ? undefined : '5 5',
+            },
+          }
+        })
+        setTimeout(() => pushToHistory(nodes, newEdges), 0)
+        return newEdges
+      })
+    },
+    [nodes, pushToHistory]
+  )
+
+  // Toggle edge animation
+  const toggleEdgeAnimation = useCallback(
+    (edgeId: string) => {
+      setEdges((eds) => {
+        const newEdges = eds.map((edge) =>
+          edge.id === edgeId ? { ...edge, animated: !edge.animated } : edge
+        )
+        setTimeout(() => pushToHistory(nodes, newEdges), 0)
+        return newEdges
+      })
+    },
+    [nodes, pushToHistory]
+  )
+
+  // Close edge editor when clicking elsewhere
+  const onPaneClick = useCallback(() => {
+    setShowEdgeEditor(false)
+    setSelectedEdgeId(null)
+  }, [])
+
+  // Undo action handler
+  const handleUndo = useCallback(() => {
+    const result = undo()
+    if (result) {
+      setNodes(result.nodes)
+      setEdges(result.edges)
+    }
+  }, [undo])
+
+  // Redo action handler
+  const handleRedo = useCallback(() => {
+    const result = redo()
+    if (result) {
+      setNodes(result.nodes)
+      setEdges(result.edges)
+    }
+  }, [redo])
+
+  // Initialize history with initial state
+  useEffect(() => {
+    pushToHistory(nodes, edges)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        if (e.shiftKey) {
+          e.preventDefault()
+          handleRedo()
+        } else {
+          e.preventDefault()
+          handleUndo()
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleUndo, handleRedo])
 
   const addNode = () => {
     const label = nodeName.trim() || `Node ${nodeCount}`
@@ -306,22 +300,25 @@ function FlowEditor() {
       position: { x: Math.random() * 300 + 100, y: Math.random() * 200 + 100 },
       data: { label, color: selectedColor, onLabelChange, onColorChange },
     }
-    setNodes((nds) => [...nds, newNode])
+    const newNodes = [...nodes, newNode]
+    setNodes(newNodes)
     setNodeCount((c) => c + 1)
     setNodeName('')
+    pushToHistory(newNodes, edges)
   }
 
   const deleteSelected = () => {
     const selectedNodeIds = selectedNodes.map((n) => n.id)
-    setNodes((nds) => nds.filter((n) => !n.selected))
-    setEdges((eds) =>
-      eds.filter(
-        (e) =>
-          !e.selected &&
-          !selectedNodeIds.includes(e.source) &&
-          !selectedNodeIds.includes(e.target)
-      )
+    const newNodes = nodes.filter((n) => !n.selected)
+    const newEdges = edges.filter(
+      (e) =>
+        !e.selected &&
+        !selectedNodeIds.includes(e.source) &&
+        !selectedNodeIds.includes(e.target)
     )
+    setNodes(newNodes)
+    setEdges(newEdges)
+    pushToHistory(newNodes, newEdges)
   }
 
   const clearSelection = () => {
@@ -330,11 +327,144 @@ function FlowEditor() {
   }
 
   const resetFlow = () => {
-    setNodes(createInitialNodes(onLabelChange, onColorChange))
+    const newNodes = createInitialNodes(onLabelChange, onColorChange)
+    setNodes(newNodes)
     setEdges(initialEdges)
     setNodeCount(4)
     setNodeName('')
+    setCurrentFlowId(null)
+    setFlowName('')
+    resetHistory()
+    setTimeout(() => {
+      fitView()
+      pushToHistory(newNodes, initialEdges)
+    }, 50)
+  }
+
+  // Prepare nodes for saving (strip callback functions)
+  const prepareNodesForSave = () => {
+    return nodes.map((node) => ({
+      id: node.id,
+      type: node.type || 'custom',
+      position: node.position,
+      data: {
+        label: node.data.label as string,
+        color: node.data.color as string,
+      },
+    }))
+  }
+
+  // Prepare edges for saving
+  const prepareEdgesForSave = () => {
+    return edges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      animated: edge.animated,
+      style: edge.style
+        ? {
+            stroke: edge.style.stroke as string | undefined,
+            strokeDasharray: edge.style.strokeDasharray as string | undefined,
+            strokeWidth: edge.style.strokeWidth as number | undefined,
+          }
+        : undefined,
+    }))
+  }
+
+  // Save current flow
+  const handleSave = async () => {
+    if (!flowName.trim()) return
+
+    setIsSaving(true)
+    try {
+      if (currentFlowId) {
+        await updateFlow({
+          id: currentFlowId,
+          nodes: prepareNodesForSave(),
+          edges: prepareEdgesForSave(),
+        })
+      } else {
+        const newId = await createFlow({
+          name: flowName.trim(),
+          nodes: prepareNodesForSave(),
+          edges: prepareEdgesForSave(),
+        })
+        setCurrentFlowId(newId)
+      }
+      setShowSaveDialog(false)
+    } catch (error) {
+      console.error('Failed to save flow:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Quick save (update existing flow)
+  const handleQuickSave = async () => {
+    if (!currentFlowId) {
+      setShowSaveDialog(true)
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      await updateFlow({
+        id: currentFlowId,
+        nodes: prepareNodesForSave(),
+        edges: prepareEdgesForSave(),
+      })
+    } catch (error) {
+      console.error('Failed to save flow:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Load a saved flow
+  const loadFlow = (flow: NonNullable<typeof savedFlows>[number]) => {
+    const loadedNodes: Node[] = flow.nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        onLabelChange,
+        onColorChange,
+      },
+    }))
+
+    const loadedEdges: Edge[] = flow.edges.map((edge) => ({
+      ...edge,
+      style: edge.style
+        ? { ...edge.style, strokeWidth: edge.style.strokeWidth ?? 2 }
+        : { stroke: '#64748b', strokeWidth: 2 },
+    }))
+
+    setNodes(loadedNodes)
+    setEdges(loadedEdges)
+    setCurrentFlowId(flow._id)
+    setFlowName(flow.name)
+    setNodeCount(
+      Math.max(
+        4,
+        ...flow.nodes.map((n) => {
+          const match = n.id.match(/node-(\d+)/)
+          return match ? parseInt(match[1], 10) + 1 : 0
+        })
+      )
+    )
+    setShowLoadDialog(false)
     setTimeout(() => fitView(), 50)
+  }
+
+  // Delete a saved flow
+  const handleDeleteFlow = async (flowId: Id<'flows'>) => {
+    try {
+      await deleteFlow({ id: flowId })
+      if (currentFlowId === flowId) {
+        resetFlow()
+      }
+    } catch (error) {
+      console.error('Failed to delete flow:', error)
+    }
   }
 
   return (
@@ -359,114 +489,53 @@ function FlowEditor() {
         </p>
 
         {/* Toolbar */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4">
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Add Node Section */}
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={nodeName}
-                onChange={(e) => setNodeName(e.target.value)}
-                placeholder="Node name..."
-                className="px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm w-32 focus:outline-none focus:border-cyan-500"
-                onKeyDown={(e) => e.key === 'Enter' && addNode()}
-              />
-              <div className="flex gap-1">
-                {nodeColors.map((color) => (
-                  <button
-                    key={color.value}
-                    onClick={() => setSelectedColor(color.value)}
-                    className={`w-6 h-6 rounded-full transition-all ${
-                      selectedColor === color.value
-                        ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800'
-                        : ''
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-              <button
-                onClick={addNode}
-                className="px-3 py-2 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add Node
-              </button>
-            </div>
-
-            <div className="w-px h-8 bg-slate-600" />
-
-            {/* Selection Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={deleteSelected}
-                disabled={
-                  selectedNodes.length === 0 && selectedEdges.length === 0
-                }
-                className="px-3 py-2 bg-red-500 hover:bg-red-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </button>
-              <button
-                onClick={clearSelection}
-                disabled={
-                  selectedNodes.length === 0 && selectedEdges.length === 0
-                }
-                className="px-3 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm"
-              >
-                <MousePointer className="w-4 h-4" />
-                Deselect
-              </button>
-            </div>
-
-            <div className="w-px h-8 bg-slate-600" />
-
-            {/* Reset */}
-            <button
-              onClick={resetFlow}
-              className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reset
-            </button>
-          </div>
-
-          {/* Selection Info */}
-          <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
-            <span className="flex items-center gap-1">
-              <Circle className="w-3 h-3 fill-cyan-400 text-cyan-400" />
-              {nodes.length} nodes
-            </span>
-            <span>|</span>
-            <span>{edges.length} edges</span>
-            {(selectedNodes.length > 0 || selectedEdges.length > 0) && (
-              <>
-                <span>|</span>
-                <span className="text-cyan-400">
-                  Selected: {selectedNodes.length} nodes, {selectedEdges.length}{' '}
-                  edges
-                </span>
-              </>
-            )}
-          </div>
-        </div>
+        <FlowToolbar
+          nodeName={nodeName}
+          onNodeNameChange={setNodeName}
+          selectedColor={selectedColor}
+          onColorChange={setSelectedColor}
+          onAddNode={addNode}
+          onDeleteSelected={deleteSelected}
+          onClearSelection={clearSelection}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onSave={handleQuickSave}
+          onLoad={() => setShowLoadDialog(true)}
+          onReset={resetFlow}
+          isSaving={isSaving}
+          hasSelection={selectedNodes.length > 0 || selectedEdges.length > 0}
+          nodesCount={nodes.length}
+          edgesCount={edges.length}
+          selectedNodesCount={selectedNodes.length}
+          selectedEdgesCount={selectedEdges.length}
+          currentFlowName={currentFlowId ? flowName : null}
+          hasCurrentFlow={!!currentFlowId}
+        />
 
         {/* Instructions */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-400">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-xs text-gray-400">
             <div>
-              <span className="text-cyan-400 font-medium">Edit:</span>{' '}
-              Double-click node to rename
+              <span className="text-cyan-400 font-medium">Edit Node:</span>{' '}
+              Double-click to rename
             </div>
             <div>
-              <span className="text-cyan-400 font-medium">Color:</span> Select
-              node, click palette icon
+              <span className="text-cyan-400 font-medium">Node Color:</span>{' '}
+              Select, click palette
+            </div>
+            <div>
+              <span className="text-cyan-400 font-medium">Edit Edge:</span>{' '}
+              Click line for options
             </div>
             <div>
               <span className="text-cyan-400 font-medium">Connect:</span> Drag
               handle to handle
+            </div>
+            <div>
+              <span className="text-cyan-400 font-medium">Undo/Redo:</span>{' '}
+              Ctrl+Z / Ctrl+Shift+Z
             </div>
             <div>
               <span className="text-cyan-400 font-medium">Delete:</span> Select
@@ -484,16 +553,20 @@ function FlowEditor() {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onEdgeClick={onEdgeClick}
+              onPaneClick={onPaneClick}
               nodeTypes={nodeTypes}
               fitView
               selectNodesOnDrag={false}
               selectionOnDrag
               panOnDrag={[1, 2]}
               selectionMode={SelectionMode.Partial}
+              elementsSelectable={true}
+              edgesFocusable={true}
               className="bg-slate-900"
               defaultEdgeOptions={{
                 animated: true,
-                style: { stroke: '#64748b' },
+                style: { stroke: '#64748b', strokeWidth: 2 },
               }}
             >
               <Controls className="!bg-slate-800 !border-slate-700 !rounded-lg [&>button]:!bg-slate-700 [&>button]:!border-slate-600 [&>button]:!text-white [&>button:hover]:!bg-slate-600" />
@@ -507,6 +580,44 @@ function FlowEditor() {
           </div>
         </div>
       </div>
+
+      {/* Save Dialog */}
+      {showSaveDialog && (
+        <SaveDialog
+          flowName={flowName}
+          onFlowNameChange={setFlowName}
+          onSave={handleSave}
+          onCancel={() => setShowSaveDialog(false)}
+          isSaving={isSaving}
+        />
+      )}
+
+      {/* Load Dialog */}
+      {showLoadDialog && (
+        <LoadDialog
+          savedFlows={savedFlows}
+          currentFlowId={currentFlowId}
+          onLoadFlow={loadFlow}
+          onDeleteFlow={handleDeleteFlow}
+          onClose={() => setShowLoadDialog(false)}
+        />
+      )}
+
+      {/* Edge Editor Popup */}
+      {showEdgeEditor && selectedEdgeId && (
+        <EdgeEditorPopup
+          selectedEdgeId={selectedEdgeId}
+          edges={edges}
+          position={edgeEditorPosition}
+          onClose={() => {
+            setShowEdgeEditor(false)
+            setSelectedEdgeId(null)
+          }}
+          onColorChange={updateEdgeColor}
+          onToggleDashed={toggleEdgeDashed}
+          onToggleAnimation={toggleEdgeAnimation}
+        />
+      )}
     </div>
   )
 }

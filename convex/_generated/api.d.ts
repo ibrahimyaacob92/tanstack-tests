@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as flows from "../flows.js";
 import type * as snapshots from "../snapshots.js";
 
 import type {
@@ -17,6 +18,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  flows: typeof flows;
   snapshots: typeof snapshots;
 }>;
 

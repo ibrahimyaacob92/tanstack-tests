@@ -1,10 +1,13 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { ConvexProvider, ConvexReactClient } from 'convex/react'
 
 import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
+
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
 export const Route = createRootRoute({
   head: () => ({
@@ -38,19 +41,21 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
-        {children}
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        <ConvexProvider client={convex}>
+          <Header />
+          {children}
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+        </ConvexProvider>
         <Scripts />
       </body>
     </html>
