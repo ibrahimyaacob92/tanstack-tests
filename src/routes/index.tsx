@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Camera, FlaskConical, ArrowRight, GitBranch } from 'lucide-react'
+import { Camera, FlaskConical, ArrowRight, GitBranch, HardDrive, Database } from 'lucide-react'
 
 export const Route = createFileRoute('/')({ component: App })
 
@@ -21,6 +21,24 @@ const experiments = [
       'Build interactive node-based UIs, diagrams, and workflows. Drag nodes, connect them, and create visual data flows.',
     library: '@xyflow/react',
     href: '/react-flow',
+  },
+  {
+    id: 'r2-storage',
+    icon: <HardDrive className="w-10 h-10 text-cyan-400" />,
+    title: 'Cloudflare R2 Storage',
+    description:
+      'Upload, store, and manage files using Cloudflare R2 object storage. Seamlessly integrated with Convex for metadata and real-time sync.',
+    library: '@convex-dev/r2',
+    href: '/r2-storage',
+  },
+  {
+    id: 'r2-large-files',
+    icon: <Database className="w-10 h-10 text-purple-400" />,
+    title: 'R2 Large File Storage',
+    description:
+      'Upload large files (100MB-1GB) using multipart upload with chunking, parallel uploads, and real-time progress tracking.',
+    library: '@convex-dev/r2 + AWS SDK',
+    href: '/r2-large-files',
   },
 ]
 

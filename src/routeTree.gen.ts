@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SnapshotRouteImport } from './routes/snapshot'
 import { Route as ReactFlowRouteImport } from './routes/react-flow'
+import { Route as R2StorageRouteImport } from './routes/r2-storage'
+import { Route as R2LargeFilesRouteImport } from './routes/r2-large-files'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSnapshotRouteImport } from './routes/api/snapshot'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
@@ -30,6 +32,16 @@ const SnapshotRoute = SnapshotRouteImport.update({
 const ReactFlowRoute = ReactFlowRouteImport.update({
   id: '/react-flow',
   path: '/react-flow',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R2StorageRoute = R2StorageRouteImport.update({
+  id: '/r2-storage',
+  path: '/r2-storage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R2LargeFilesRoute = R2LargeFilesRouteImport.update({
+  id: '/r2-large-files',
+  path: '/r2-large-files',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -85,6 +97,8 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/r2-large-files': typeof R2LargeFilesRoute
+  '/r2-storage': typeof R2StorageRoute
   '/react-flow': typeof ReactFlowRoute
   '/snapshot': typeof SnapshotRoute
   '/api/snapshot': typeof ApiSnapshotRouteWithChildren
@@ -99,6 +113,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/r2-large-files': typeof R2LargeFilesRoute
+  '/r2-storage': typeof R2StorageRoute
   '/react-flow': typeof ReactFlowRoute
   '/snapshot': typeof SnapshotRoute
   '/api/snapshot': typeof ApiSnapshotRouteWithChildren
@@ -114,6 +130,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/r2-large-files': typeof R2LargeFilesRoute
+  '/r2-storage': typeof R2StorageRoute
   '/react-flow': typeof ReactFlowRoute
   '/snapshot': typeof SnapshotRoute
   '/api/snapshot': typeof ApiSnapshotRouteWithChildren
@@ -130,6 +148,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/r2-large-files'
+    | '/r2-storage'
     | '/react-flow'
     | '/snapshot'
     | '/api/snapshot'
@@ -144,6 +164,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/r2-large-files'
+    | '/r2-storage'
     | '/react-flow'
     | '/snapshot'
     | '/api/snapshot'
@@ -158,6 +180,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/r2-large-files'
+    | '/r2-storage'
     | '/react-flow'
     | '/snapshot'
     | '/api/snapshot'
@@ -173,6 +197,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R2LargeFilesRoute: typeof R2LargeFilesRoute
+  R2StorageRoute: typeof R2StorageRoute
   ReactFlowRoute: typeof ReactFlowRoute
   SnapshotRoute: typeof SnapshotRoute
   ApiSnapshotRoute: typeof ApiSnapshotRouteWithChildren
@@ -199,6 +225,20 @@ declare module '@tanstack/react-router' {
       path: '/react-flow'
       fullPath: '/react-flow'
       preLoaderRoute: typeof ReactFlowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r2-storage': {
+      id: '/r2-storage'
+      path: '/r2-storage'
+      fullPath: '/r2-storage'
+      preLoaderRoute: typeof R2StorageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r2-large-files': {
+      id: '/r2-large-files'
+      path: '/r2-large-files'
+      fullPath: '/r2-large-files'
+      preLoaderRoute: typeof R2LargeFilesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -288,6 +328,8 @@ const ApiSnapshotRouteWithChildren = ApiSnapshotRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R2LargeFilesRoute: R2LargeFilesRoute,
+  R2StorageRoute: R2StorageRoute,
   ReactFlowRoute: ReactFlowRoute,
   SnapshotRoute: SnapshotRoute,
   ApiSnapshotRoute: ApiSnapshotRouteWithChildren,

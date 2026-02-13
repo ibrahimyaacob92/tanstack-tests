@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import {
   ReactFlow,
   Controls,
@@ -150,9 +150,37 @@ function FlowEditor() {
   const selectedNodes = nodes.filter((n) => n.selected)
   const selectedEdges = edges.filter((e) => e.selected)
 
+  // Apply selection styling to edges
+  const styledEdges = useMemo(() => {
+    return edges.map((edge) => ({
+      ...edge,
+      style: {
+        ...edge.style,
+        strokeWidth: edge.selected ? 4 : (edge.style?.strokeWidth ?? 2),
+        filter: edge.selected ? 'drop-shadow(0 0 6px #22d3ee)' : undefined,
+      },
+    }))
+  }, [edges])
+
   const onNodesChange: OnNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
+    (changes) => {
+      // Check if any position change just finished (dragging stopped)
+      const positionChangeEnded = changes.some(
+        (change) =>
+          change.type === 'position' &&
+          change.dragging === false &&
+          change.position !== undefined
+      )
+
+      setNodes((nds) => {
+        const newNodes = applyNodeChanges(changes, nds)
+        if (positionChangeEnded) {
+          setTimeout(() => pushToHistory(newNodes, edgesRef.current), 0)
+        }
+        return newNodes
+      })
+    },
+    [pushToHistory, edgesRef]
   )
 
   const onEdgesChange: OnEdgesChange = useCallback(
@@ -469,7 +497,7 @@ function FlowEditor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-[1600px] mx-auto px-6 py-8">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
@@ -546,10 +574,10 @@ function FlowEditor() {
 
         {/* Flow Canvas */}
         <div className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
-          <div style={{ width: '100%', height: '500px' }}>
+          <div style={{ width: '100%', height: '650px' }}>
             <ReactFlow
               nodes={nodes}
-              edges={edges}
+              edges={styledEdges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}

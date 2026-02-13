@@ -53,4 +53,58 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }),
+
+  // Files table for R2 storage
+  files: defineTable({
+    storageKey: v.string(), // R2 storage key
+    filename: v.string(), // Display name
+    originalFilename: v.string(), // Original upload name
+    fileSize: v.number(), // Size in bytes
+    mimeType: v.string(), // Content type
+    uploadedAt: v.number(), // Timestamp
+    description: v.optional(v.string()),
+  }),
+
+  // Multipart uploads table for large file storage
+  multipartUploads: defineTable({
+    uploadId: v.string(), // AWS multipart upload ID
+    storageKey: v.string(), // R2 storage location
+    filename: v.string(),
+    mimeType: v.string(),
+    totalSize: v.number(),
+
+    status: v.union(
+      v.literal('initiating'),
+      v.literal('in_progress'),
+      v.literal('completing'),
+      v.literal('completed'),
+      v.literal('failed'),
+      v.literal('aborted')
+    ),
+
+    parts: v.array(
+      v.object({
+        partNumber: v.number(), // 1-indexed part number
+        etag: v.optional(v.string()), // From S3 response
+        size: v.number(),
+        status: v.union(
+          v.literal('pending'),
+          v.literal('uploading'),
+          v.literal('completed'),
+          v.literal('failed')
+        ),
+      })
+    ),
+
+    uploadedParts: v.number(),
+    totalParts: v.number(),
+    bytesUploaded: v.number(),
+
+    startedAt: v.number(),
+    lastActivityAt: v.number(),
+    completedAt: v.optional(v.number()),
+    errorMessage: v.optional(v.string()),
+  })
+    .index('by_status', ['status'])
+    .index('by_storage_key', ['storageKey']),
 })
