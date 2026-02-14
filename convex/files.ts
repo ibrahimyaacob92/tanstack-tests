@@ -7,24 +7,13 @@ import type { DataModel } from "./_generated/dataModel";
 // Initialize R2 component
 export const r2 = new R2(components.r2);
 
-// Generate upload URL and sync metadata functions using R2 client API
-export const { generateUploadUrl, syncMetadata, onSyncMetadata } =
-  r2.clientApi<DataModel>({
-    checkUpload: async (ctx, bucket) => {
-      // Optional: Add upload validation here
-      // For now, allow all uploads
-    },
-    onUpload: async (ctx, bucket, key) => {
-      // Optional: Handle post-upload logic
-      // We'll handle metadata saving manually in saveFileMetadata
-      console.log(`File uploaded: ${key} to bucket: ${bucket}`);
-    },
-    onSyncMetadata: async (ctx, args) => {
-      // Optional: Log metadata sync
-      const metadata = await r2.getMetadata(ctx, args.key);
-      console.log("Synced metadata:", metadata);
-    },
-  });
+// Generate upload URL and sync metadata using R2 client API
+export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
+  checkUpload: async (ctx, bucket) => {
+    // Optional: Add upload validation here
+    // For now, allow all uploads
+  },
+});
 
 // Save file metadata after upload
 export const saveFileMetadata = mutation({

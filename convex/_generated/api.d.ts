@@ -10,7 +10,9 @@
 
 import type * as files from "../files.js";
 import type * as flows from "../flows.js";
+import type * as largeFiles from "../largeFiles.js";
 import type * as snapshots from "../snapshots.js";
+import type * as urlUpload from "../urlUpload.js";
 
 import type {
   ApiFromModules,
@@ -21,7 +23,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   files: typeof files;
   flows: typeof flows;
+  largeFiles: typeof largeFiles;
   snapshots: typeof snapshots;
+  urlUpload: typeof urlUpload;
 }>;
 
 /**

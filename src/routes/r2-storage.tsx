@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { useUploadFile } from "@convex-dev/r2/react";
 import { ArrowLeft, HardDrive, CheckCircle2 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import { FileUploader } from "./r2-storage/components/FileUploader";
 import { FileList } from "./r2-storage/components/FileList";
+import { UrlUploader } from "./r2-storage/components/UrlUploader";
 
 export const Route = createFileRoute("/r2-storage")({
   component: R2StorageDemo,
@@ -17,10 +18,11 @@ function R2StorageDemo() {
 
   // Convex hooks
   const files = useQuery(api.files.listFiles);
-  const saveFileMetadata = useMutation(api.files.saveFileMetadata);
   const deleteFile = useMutation(api.files.deleteFile);
+  const saveMetadata = useMutation(api.files.saveFileMetadata);
+  const uploadFromUrl = useAction(api.urlUpload.uploadFromUrl);
 
-  // R2 upload hook - pass the generateUploadUrl mutation
+  // R2 upload hook
   const uploadFile = useUploadFile({
     generateUploadUrl: api.files.generateUploadUrl,
     syncMetadata: api.files.syncMetadata,
@@ -31,11 +33,11 @@ function R2StorageDemo() {
     setSuccessMessage(null);
 
     try {
-      // Upload file to R2 via Convex component
+      // 1. Upload file to R2
       const storageKey = await uploadFile(file);
 
-      // Save metadata to Convex database
-      await saveFileMetadata({
+      // 2. Save metadata with file info from frontend
+      await saveMetadata({
         storageKey,
         filename: file.name,
         originalFilename: file.name,
@@ -47,6 +49,24 @@ function R2StorageDemo() {
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
       console.error("Upload error:", error);
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleUrlUpload = async (url: string, filename?: string) => {
+    setUploading(true);
+    setSuccessMessage(null);
+
+    try {
+      const result = await uploadFromUrl({ url, filename });
+      setSuccessMessage(
+        `File "${result.filename}" uploaded from URL successfully!`,
+      );
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error("URL upload error:", error);
       throw error;
     } finally {
       setUploading(false);
@@ -144,10 +164,29 @@ function R2StorageDemo() {
 
         {/* Upload Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-white mb-4">
+          <h2 className="text-2xl font-semibold text-white mb-6">
             Upload File
           </h2>
-          <FileUploader onUpload={handleUpload} uploading={uploading} />
+
+          <div className="space-y-6">
+            {/* Direct File Upload */}
+            <FileUploader onUpload={handleUpload} uploading={uploading} />
+
+            {/* OR Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-slate-900 text-gray-400 font-medium">
+                  OR
+                </span>
+              </div>
+            </div>
+
+            {/* URL Upload */}
+            <UrlUploader onUpload={handleUrlUpload} uploading={uploading} />
+          </div>
         </div>
 
         {/* Files Gallery */}
