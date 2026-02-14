@@ -68,11 +68,13 @@ export const listFiles = query({
   handler: async (ctx) => {
     const files = await ctx.db.query("bunnyFiles").order("desc").collect();
 
-    // Build download URLs for all files
+    // Build download URLs for all files with proper filename
     const siteUrl = process.env.CONVEX_SITE_URL!;
     const filesWithUrls = files.map((file) => ({
       ...file,
-      url: buildDownloadUrl(siteUrl, "/fs", file.blobId, file.path),
+      url: buildDownloadUrl(siteUrl, "/fs", file.blobId, file.path, {
+        filename: file.filename,
+      }),
     }));
 
     return filesWithUrls;
@@ -88,9 +90,11 @@ export const getFile = query({
       return null;
     }
 
-    // Build download URL
+    // Build download URL with proper filename
     const siteUrl = process.env.CONVEX_SITE_URL!;
-    const url = buildDownloadUrl(siteUrl, "/fs", file.blobId, file.path);
+    const url = buildDownloadUrl(siteUrl, "/fs", file.blobId, file.path, {
+      filename: file.filename,
+    });
 
     return {
       ...file,

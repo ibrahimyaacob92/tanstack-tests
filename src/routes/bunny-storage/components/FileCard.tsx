@@ -1,39 +1,50 @@
-import { Download, Trash2, Loader2 } from 'lucide-react'
-import { getFileIcon, formatFileSize } from '../constants'
-import type { Id } from '../../../../convex/_generated/dataModel'
+import { Download, Trash2, Loader2 } from "lucide-react";
+import { getFileIcon, formatFileSize } from "../constants";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
 interface FileCardProps {
   file: {
-    _id: Id<'bunnyFiles'>
-    filename: string
-    fileSize: number
-    mimeType: string
-    uploadedAt: number
-    url: string | null
-  }
-  onDelete: (id: Id<'bunnyFiles'>) => Promise<void>
-  deleting: boolean
+    _id: Id<"bunnyFiles">;
+    filename: string;
+    fileSize: number;
+    mimeType: string;
+    uploadedAt: number;
+    url: string | null;
+  };
+  onDelete: (id: Id<"bunnyFiles">) => Promise<void>;
+  deleting: boolean;
 }
 
 export function FileCard({ file, onDelete, deleting }: FileCardProps) {
-  const isImage = file.mimeType.startsWith('image/')
-  const uploadDate = new Date(file.uploadedAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const isImage = file.mimeType.startsWith("image/");
+  const uploadDate = new Date(file.uploadedAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
   const handleDownload = () => {
-    if (file.url) {
-      window.open(file.url, '_blank')
-    }
-  }
+    // Use custom download endpoint that sets proper Content-Disposition header
+    const siteUrl = (import.meta.env.VITE_CONVEX_URL ?? "").replace(
+      /\.cloud$/,
+      ".site"
+    );
+    const downloadUrl = `${siteUrl}/download?id=${file._id}`;
+
+    // Create a temporary anchor element
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = file.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const handleDelete = async () => {
     if (confirm(`Are you sure you want to delete "${file.filename}"?`)) {
-      await onDelete(file._id)
+      await onDelete(file._id);
     }
-  }
+  };
 
   return (
     <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden hover:border-orange-500/50 transition-all group">
@@ -52,7 +63,10 @@ export function FileCard({ file, onDelete, deleting }: FileCardProps) {
 
       {/* File Info */}
       <div className="p-4">
-        <h3 className="text-white font-medium truncate mb-1" title={file.filename}>
+        <h3
+          className="text-white font-medium truncate mb-1"
+          title={file.filename}
+        >
           {file.filename}
         </h3>
         <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
@@ -84,5 +98,5 @@ export function FileCard({ file, onDelete, deleting }: FileCardProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
