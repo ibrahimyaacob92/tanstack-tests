@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Camera, FlaskConical, ArrowRight, GitBranch, HardDrive, Database } from 'lucide-react'
+import { Camera, FlaskConical, ArrowRight, GitBranch, HardDrive, Database, Rabbit } from 'lucide-react'
 
 export const Route = createFileRoute('/')({ component: App })
 
@@ -39,6 +39,15 @@ const experiments = [
       'Upload large files (100MB-1GB) using multipart upload with chunking, parallel uploads, and real-time progress tracking.',
     library: '@convex-dev/r2 + AWS SDK',
     href: '/r2-large-files',
+  },
+  {
+    id: 'bunny-storage',
+    icon: <Rabbit className="w-10 h-10 text-orange-400" />,
+    title: 'Bunny.net Storage (ConvexFS)',
+    description:
+      'Upload and manage files using Bunny.net Edge Storage via ConvexFS. Path-based file organization with global CDN delivery and signed URLs.',
+    library: 'convex-fs',
+    href: '/bunny-storage',
   },
 ]
 

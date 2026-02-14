@@ -13,6 +13,7 @@ import { Route as SnapshotRouteImport } from './routes/snapshot'
 import { Route as ReactFlowRouteImport } from './routes/react-flow'
 import { Route as R2StorageRouteImport } from './routes/r2-storage'
 import { Route as R2LargeFilesRouteImport } from './routes/r2-large-files'
+import { Route as BunnyStorageRouteImport } from './routes/bunny-storage'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSnapshotRouteImport } from './routes/api/snapshot'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
@@ -42,6 +43,11 @@ const R2StorageRoute = R2StorageRouteImport.update({
 const R2LargeFilesRoute = R2LargeFilesRouteImport.update({
   id: '/r2-large-files',
   path: '/r2-large-files',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BunnyStorageRoute = BunnyStorageRouteImport.update({
+  id: '/bunny-storage',
+  path: '/bunny-storage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -97,6 +103,7 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bunny-storage': typeof BunnyStorageRoute
   '/r2-large-files': typeof R2LargeFilesRoute
   '/r2-storage': typeof R2StorageRoute
   '/react-flow': typeof ReactFlowRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bunny-storage': typeof BunnyStorageRoute
   '/r2-large-files': typeof R2LargeFilesRoute
   '/r2-storage': typeof R2StorageRoute
   '/react-flow': typeof ReactFlowRoute
@@ -130,6 +138,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bunny-storage': typeof BunnyStorageRoute
   '/r2-large-files': typeof R2LargeFilesRoute
   '/r2-storage': typeof R2StorageRoute
   '/react-flow': typeof ReactFlowRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bunny-storage'
     | '/r2-large-files'
     | '/r2-storage'
     | '/react-flow'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bunny-storage'
     | '/r2-large-files'
     | '/r2-storage'
     | '/react-flow'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/bunny-storage'
     | '/r2-large-files'
     | '/r2-storage'
     | '/react-flow'
@@ -197,6 +209,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BunnyStorageRoute: typeof BunnyStorageRoute
   R2LargeFilesRoute: typeof R2LargeFilesRoute
   R2StorageRoute: typeof R2StorageRoute
   ReactFlowRoute: typeof ReactFlowRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/r2-large-files'
       fullPath: '/r2-large-files'
       preLoaderRoute: typeof R2LargeFilesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bunny-storage': {
+      id: '/bunny-storage'
+      path: '/bunny-storage'
+      fullPath: '/bunny-storage'
+      preLoaderRoute: typeof BunnyStorageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -328,6 +348,7 @@ const ApiSnapshotRouteWithChildren = ApiSnapshotRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BunnyStorageRoute: BunnyStorageRoute,
   R2LargeFilesRoute: R2LargeFilesRoute,
   R2StorageRoute: R2StorageRoute,
   ReactFlowRoute: ReactFlowRoute,

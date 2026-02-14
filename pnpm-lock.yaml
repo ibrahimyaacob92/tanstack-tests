@@ -50,6 +50,9 @@ importers:
       convex:
         specifier: ^1.31.3
         version: 1.31.3(react@19.2.0)
+      convex-fs:
+        specifier: ^0.2.1
+        version: 0.2.1(convex@1.31.3(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.76)
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.2.0)
@@ -2043,6 +2046,12 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
+  convex-fs@0.2.1:
+    resolution: {integrity: sha512-j6pd6dNk1TXzS5kxWRNZBUb7fRT4FE4cQE6TAEFy/bkuihoIUwj9KQ3O0Goqvsd3Xn2Tlzxotb8E0P4eacj1iQ==}
+    peerDependencies:
+      convex: ^1.29.3
+      react: ^18.3.1 || ^19.0.0
+
   convex-helpers@0.1.112:
     resolution: {integrity: sha512-zhcm14aaRRNQYwxsFngmfYsGB3V0HwJ/hHMfKI9eeTR1N0b9o5Rohqvz3NgzyVJcmGNvYlZpUPbOy2YL5sYQNw==}
     hasBin: true
@@ -2325,6 +2334,9 @@ packages:
 
   fast-fifo@1.3.2:
     resolution: {integrity: sha512-/d9sfos4yxzpwkDkuN7k2SqFKtYNmCTzgfEpz82x34IM9/zc8KGxQoXg1liNC/izpRM/MBdt44Nmx41ZWqk+FQ==}
+
+  fast-json-stable-stringify@2.1.0:
+    resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
   fast-xml-parser@4.4.1:
     resolution: {integrity: sha512-xkjOecfnKGkSsOwtZ5Pz7Us/T6mrbPQrq0nh+aCO5V9nk5NLWmasAHumTKjiPJPWANe+kAZ84Jc8ooJkzZ88Sw==}
@@ -5710,6 +5722,18 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
+  convex-fs@0.2.1(convex@1.31.3(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.76):
+    dependencies:
+      convex: 1.31.3(react@19.2.0)
+      convex-helpers: 0.1.112(convex@1.31.3(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.76)
+      fast-json-stable-stringify: 2.1.0
+      react: 19.2.0
+    transitivePeerDependencies:
+      - '@standard-schema/spec'
+      - hono
+      - typescript
+      - zod
+
   convex-helpers@0.1.112(convex@1.31.3(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.76):
     dependencies:
       convex: 1.31.3(react@19.2.0)
@@ -5979,6 +6003,8 @@ snapshots:
       - supports-color
 
   fast-fifo@1.3.2: {}
+
+  fast-json-stable-stringify@2.1.0: {}
 
   fast-xml-parser@4.4.1:
     dependencies:

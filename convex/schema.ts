@@ -65,6 +65,17 @@ export default defineSchema({
     description: v.optional(v.string()),
   }),
 
+  // Bunny Files table for ConvexFS storage
+  bunnyFiles: defineTable({
+    path: v.string(), // ConvexFS path
+    blobId: v.string(), // Blob reference ID
+    filename: v.string(), // Display name
+    fileSize: v.number(), // Size in bytes
+    mimeType: v.string(), // Content type
+    uploadedAt: v.number(), // Timestamp
+    description: v.optional(v.string()),
+  }).index('by_path', ['path']),
+
   // Multipart uploads table for large file storage
   multipartUploads: defineTable({
     uploadId: v.string(), // AWS multipart upload ID
